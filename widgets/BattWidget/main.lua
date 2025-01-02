@@ -1,12 +1,16 @@
 -- Widget LUA Script: Battery Widget
 -- Displays RXBt, Curr, and Capa values with specific behaviors and icons
 
+local textStyle = RIGHT + WHITE + SHADOWED
+local midLineHeight = 25
+local lineHeight = 18
+
+-- Function to create the widget
 local function create(zone, options)
-    local widget = {
+    return {
         zone = zone,
         cfg = options,
     }
-    return widget
 end
 
 local function update(widget, options)
@@ -15,51 +19,50 @@ end
 
 local function refresh(widget, event, touchState)
 
-	local lq = tonumber(getValue("RQly")) or 0
-	
-		if lq > 0 then
-	
-			-- Get telemetry data
-			local rxBt = tonumber(getValue("RxBt")) or 0
-			local curr = tonumber(getValue("Curr")) or 0
-			local capa = tonumber(getValue("Capa")) or 0
+	-- Define positions
+	local xRight = widget.zone.x + widget.zone.w - 10
+	local xLeft = widget.zone.x + 10
+	local yStart = widget.zone.y + 35
 
-			-- Define positions
-			local xRight = widget.zone.x + widget.zone.w - 10
-			local xLeft = widget.zone.x + 10
-			local yStart = widget.zone.y + 5
-			local lineHeight = 20
-			local smlLineHeight = 18
+	local tpwr = tonumber(getValue("TPWR")) or 0
+  
+	if tpwr > 0 then
 
-			-- Determine battery icon based on RXBt value
-			local iconPath = "/WIDGETS/BattWidget/BMP/battery-%s.png"
-			local iconState
-			if rxBt < 3.2 then
-				iconState = "dead"
-			elseif rxBt < 3.6 then
-				iconState = "low"
-			elseif rxBt < 3.8 then
-				iconState = "yellow"
-			elseif rxBt < 4.0 then
-				iconState = "ok"
-			else
-				iconState = "full"
-			end
-			local icon = Bitmap.open(string.format(iconPath, iconState))
+		-- Get telemetry data
+		local rxBt = tonumber(getValue("RxBt")) or 0
+		local curr = tonumber(getValue("Curr")) or 0
+		local capa = tonumber(getValue("Capa")) or 0
 
-			-- Draw battery icon
-			lcd.drawBitmap(icon, xRight - 105, yStart + 5)
-
-			-- Draw RXBt
-			lcd.drawText(xRight, yStart, string.format("%.2fV", rxBt), RIGHT + MIDSIZE + WHITE + SHADOWED)
-
-			-- Draw Curr
-			lcd.drawText(xRight, yStart + 8 + lineHeight, string.format("Curr: %.2fA", curr), RIGHT + SMLSIZE + WHITE)
-
-			-- Draw Capa
-			lcd.drawText(xRight, yStart + 8 + 2 * smlLineHeight, string.format("Cap: %dmAh", capa), RIGHT + SMLSIZE + WHITE)
-			
+		-- Determine battery icon based on RXBt value
+		local iconPath = "/WIDGETS/BattWidget/BMP/battery-%s.png"
+		local iconState
+		if rxBt < 3.2 then
+			iconState = "dead"
+		elseif rxBt < 3.6 then
+			iconState = "low"
+		elseif rxBt < 3.8 then
+			iconState = "yellow"
+		elseif rxBt < 4.0 then
+			iconState = "ok"
+		else
+			iconState = "full"
 		end
+		local icon = Bitmap.open(string.format(iconPath, iconState))
+
+		-- Draw battery icon
+		lcd.drawBitmap(icon, xRight - 55, yStart -35)
+
+		-- Draw RXBt
+		lcd.drawText(xRight, yStart, string.format("%.2fV", rxBt), textStyle + MIDSIZE)
+
+		-- Draw Curr
+		lcd.drawText(xRight, yStart + midLineHeight, string.format("Curr: %.2fA", curr), textStyle)
+
+		-- Draw Capa
+		lcd.drawText(xRight, yStart + midLineHeight + lineHeight, string.format("Cap: %dmAh", capa), textStyle)
+		
+	end
+	
 end
 
 local function background(widget)

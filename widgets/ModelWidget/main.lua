@@ -1,8 +1,3 @@
---196x169 right half
---392x84 top half
---196x56 1 + 3
---196x42 1 + 4
-
 -- Define positions
 local xLeft = 10
 local yStart = 5
@@ -106,10 +101,10 @@ local function refresh(widget, event, touchState)
   local vBatt = tonumber(getValue(idTxV)) or 0
   lcd.drawText(xLeft + 55, yStart + 8 + 3*lineHeight, string.format("%.2fV", vBatt), textStyle + MIDSIZE)
   
-  -- Determine battery icon based on RXBt value
+  -- Determine battery icon based on RXBt vBatt
 	local iconPath = "/WIDGETS/ModelWidget/BMP/battery-%s.png"
 	local iconState
-    if vBatt < 7.1 then
+  if vBatt < 7.1 then
 		iconState = "low"
 	elseif vBatt < 7.5 then
 		iconState = "yellow"
@@ -122,8 +117,6 @@ local function refresh(widget, event, touchState)
 
 	-- Draw battery icon
 	lcd.drawBitmap(icon, xLeft - 2, yStart + 5 + 3*lineHeight)
-			
-			
 
 end
 

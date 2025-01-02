@@ -2,29 +2,53 @@
 -- Displays satellite count, latitude, and longitude with small text aligned to the right
 -- Includes color-coded satellite count and satellite icon
 
+
+local textStyle = RIGHT + WHITE + SHADOWED
+local midLineHeight = 25
+local lineHeight = 18
+
+
+-- Function to create the widget
 local function create(zone, options)
-    local widget = {
+    return {
         zone = zone,
         cfg = options,
     }
-    return widget
 end
 
 local function update(widget, options)
     widget.cfg = options
 end
 
-local function refresh(widget, event, touchState)
-    -- Check if RX is connected using telemetry link quality (LQ)
-    local lq = tonumber(getValue("RQly")) or 0
-    if lq > 0 then
+-- Helper function to convert decimal degrees to degrees, minutes, and seconds
+local function toDMS(value)
+    local degrees = math.floor(value)
+    local minutes = math.floor((value - degrees) * 60)
+    local seconds = ((value - degrees) * 60 - minutes) * 60
+    return degrees, minutes, seconds
+end
 
-	   -- Define positions
+-- Function to format latitude and longitude
+local function formatLatLon(lat, lon)
+    local latDeg, latMin, latSec = toDMS(math.abs(lat))
+    local lonDeg, lonMin, lonSec = toDMS(math.abs(lon))
+    local latDir = lat >= 0 and "N" or "S"
+    local lonDir = lon >= 0 and "E" or "W"
+    return string.format("%d°%d'%d\"%s", latDeg, latMin, latSec, latDir),
+           string.format("%d°%d'%d\"%s", lonDeg, lonMin, lonSec, lonDir)
+end
+
+local function refresh(widget, event, touchState)
+
+    -- Check if RX is connected using telemetry link quality (LQ)
+	local tpwr = tonumber(getValue("TPWR")) or 0
+  
+	if tpwr > 0 then
+
+		-- Define positions
 		local xRight = widget.zone.x + widget.zone.w - 10
 		local xLeft = widget.zone.x + 10
-		local yStart = widget.zone.y + 5
-		local lineHeight = 15
-		
+		local yStart = widget.zone.y + 35
 		
 		-- Get telemetry data
 		local sats = tonumber(getValue("Sats")) or 0
@@ -32,7 +56,7 @@ local function refresh(widget, event, touchState)
 
 		-- Validate GPS data
 		if type(gpsLatLon) ~= "table" then
-			lcd.drawText(xRight, yStart, "No GPS", RIGHT + MIDSIZE + WHITE + SHADOWED)
+			lcd.drawText(xRight, yStart, "No GPS", textStyle  + MIDSIZE)
 			return
 		end
 
@@ -49,12 +73,6 @@ local function refresh(widget, event, touchState)
 			color = GREEN
 		end
 
-		-- Define positions
-		local xRight = widget.zone.x + widget.zone.w - 10
-		local xLeft = widget.zone.x + 10
-		local yStart = widget.zone.y + 5
-		local lineHeight = 15
-
 		-- Draw satellite icon
 		local iconPath = "/WIDGETS/GPSWidget/BMP/satellite-%s.png"
 		local iconColor
@@ -66,12 +84,15 @@ local function refresh(widget, event, touchState)
 			iconColor = "green"
 		end
 		local icon = Bitmap.open(string.format(iconPath, iconColor))
-		lcd.drawBitmap(icon, xRight - 145, yStart + 10)
+		lcd.drawBitmap(icon, xRight-40, yStart - 35)
+
+		-- Format latitude and longitude
+		local latStr, lonStr = formatLatLon(latitude, longitude)
 
 		-- Draw GPS Data
-		lcd.drawText(xRight, yStart, string.format("Sats: %d", sats), RIGHT + MIDSIZE + WHITE + SHADOWED)
-		lcd.drawText(xRight, yStart + 5 + lineHeight * 2, string.format("Lat: %.6f", latitude), RIGHT + SMLSIZE + WHITE)
-		lcd.drawText(xRight, yStart + 5 + lineHeight * 3, string.format("Lon: %.6f", longitude), RIGHT + SMLSIZE + WHITE)
+		lcd.drawText(xRight, yStart, string.format("Sats: %d", sats), textStyle  + MIDSIZE)
+		lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
+		lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)
 	
     end
 

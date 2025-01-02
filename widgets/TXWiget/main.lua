@@ -1,8 +1,3 @@
---196x169 right half
---392x84 top half
---196x56 1 + 3
---196x42 1 + 4
-
 -- Define positions
 local xLeft = 10
 local yStart = 5
@@ -33,7 +28,6 @@ local function create(zone, options)
   }
 
   local _, rv = getVersion()
-  widget.DEBUG = string.sub(rv, -5) == "-simu"
 
   vcache = {}
   return widget
@@ -45,20 +39,29 @@ local function update(widget, options)
 end
 
 
-local function drawRfModeText(widget, tlm, yStart)
-  local modestr = (mod.RFMOD and mod.RFMOD[tlm.rfmd+1]) or ("RFMD" .. tostring(tlm.rfmd)) 
-  tlm.fmode = getV("FM") or 0
-  lcd.drawText(xLeft, yStart + lineHeight, "RX Connected", textStyle)
-  lcd.drawText(xLeft, yStart + 2*lineHeight, modestr, textStyle)
-  lcd.drawText(xLeft, yStart + 3*lineHeight, tlm.fmode, textStyle)
-  return yStart
-end
+local function drawRfTelemetryText(widget, tlm)
+  
+  local tlm = { tpwr = getV("TPWR") }
+  
+  if tlm.tpwr == nil or tlm.tpwr == 0 then
+    lcd.drawText(xLeft, yStart + lineHeight, "No RX Connected", textStyle)
+    widget.ctx = nil
+  else
 
-local function drawRssiLq(widget, tlm, yStart)
-  local rssi = (tlm.ant == 1) and tlm.rssi2 or tlm.rssi1
-  lcd.drawText(xLeft, yStart + 4*lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
-  lcd.drawText(xLeft, yStart + 5*lineHeight, "RSSI: " .. tostring(rssi) .. "dBm", textStyle)
-  return yStart
+    tlm.rfmd = getV("RFMD") tlm.rssi1 = getV("1RSS") tlm.rssi2 = getV("2RSS") tlm.rqly = getV("RQly") tlm.ant = getV("ANT")
+    local modestr = (mod.RFMOD and mod.RFMOD[tlm.rfmd+1]) or ("RFMD" .. tostring(tlm.rfmd)) 
+    local rssi = (tlm.ant == 1) and tlm.rssi2 or tlm.rssi1
+    tlm.fmode = getV("FM") or 0
+
+    lcd.drawText(xLeft, yStart + lineHeight, "RX Connected", textStyle)
+    lcd.drawText(xLeft, yStart + 2*lineHeight, "Power: " .. tostring(tlm.tpwr) .. "mW", textStyle)
+    lcd.drawText(xLeft, yStart + 3*lineHeight, "RFMD: " .. tostring(modestr), textStyle)
+    lcd.drawText(xLeft, yStart + 4*lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
+    lcd.drawText(xLeft, yStart + 5*lineHeight, "RSSI: " .. tostring(rssi) .. "dBm", textStyle)
+    lcd.drawText(xLeft, yStart + 6*lineHeight, "FMODE: " .. tostring(tlm.fmode), textStyle)
+    
+  end
+
 end
 
 local function fieldGetString(data, off)
@@ -119,32 +122,12 @@ local function refresh(widget, event, touchState)
   -- If full screen, then event is 0 or event value, otherwise nil
   if updateElrsVer then updateElrsVer() end
   --updateWidgetSize(widget, event)
-  local yStart = 5
 
-  local tlm = { tpwr = getV("TPWR") }
-  
-  if not widget.DEBUG and (tlm.tpwr == nil or tlm.tpwr == 0) then
-    lcd.drawText(xLeft, yStart + lineHeight, "No RX Connected", textStyle)
-    widget.ctx = nil
-    return
-  end
-
-  if widget.DEBUG then
-    tlm.rfmd = 7 tlm.rssi1 = -87 tlm.rssi2 = -93 tlm.rqly = 99 tlm.ant = 1 tlm.tpwr = 50
-  else
-    tlm.rfmd = getV("RFMD") tlm.rssi1 = getV("1RSS") tlm.rssi2 = getV("2RSS") tlm.rqly = getV("RQly") tlm.ant = getV("ANT")
-  end
   if widget.ctx == nil then
     widget.ctx = {}
   end
 
-  -- Rf Mode + FMode
-  yStart = drawRfModeText(widget, tlm, yStart)
-  -- RSSI / LQ + FMode
-  yStart = drawRssiLq(widget, tlm, yStart)
-  -- TX Power
-  lcd.drawText(xLeft, yStart + 6*lineHeight, "Power: " .. tostring(tlm.tpwr) .. "mW", textStyle)
-
+  drawRfTelemetryText(widget, tlm)
 
 end
 
