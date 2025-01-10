@@ -38,6 +38,13 @@ local function update(widget, options)
   widget.cfg = options
 end
 
+-- Convert timer value to mm:ss format
+local function formatTime(seconds)
+  local minutes = math.floor(seconds / 60)
+  local remainingSeconds = seconds % 60
+  return string.format("%02d:%02d", minutes, remainingSeconds)
+end
+
 
 local function drawRfTelemetryText(widget, tlm)
   
@@ -53,13 +60,19 @@ local function drawRfTelemetryText(widget, tlm)
     local rssi = (tlm.ant == 1) and tlm.rssi2 or tlm.rssi1
     tlm.fmode = getV("FM") or 0
 
-    lcd.drawText(xLeft, yStart + lineHeight, "RX Connected", textStyle)
-    lcd.drawText(xLeft, yStart + 2*lineHeight, "Power: " .. tostring(tlm.tpwr) .. "mW", textStyle)
-    lcd.drawText(xLeft, yStart + 3*lineHeight, "RFMD: " .. tostring(modestr), textStyle)
-    lcd.drawText(xLeft, yStart + 4*lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
-    lcd.drawText(xLeft, yStart + 5*lineHeight, "RSSI: " .. tostring(rssi) .. "dBm", textStyle)
-    lcd.drawText(xLeft, yStart + 6*lineHeight, "FMODE: " .. tostring(tlm.fmode), textStyle)
-    
+    local rfmd = getValue ("RFMD") 
+    idTmr1 = getFieldInfo('timer1').id
+    local timer1 = getValue(idTmr1)
+    local timer1Formatted = formatTime(timer1)
+
+    --lcd.drawText(xLeft, yStart + lineHeight, "RX Connected", textStyle)
+    lcd.drawText(xLeft, yStart + lineHeight, "Power: " .. tostring(tlm.tpwr) .. "mW", textStyle)
+    lcd.drawText(xLeft, yStart + 2 * lineHeight, "RFMD: " .. tostring(modestr), textStyle)
+    lcd.drawText(xLeft, yStart + 3 * lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
+    lcd.drawText(xLeft, yStart + 4 * lineHeight, "RSSI: " .. tostring(rssi) .. "dBm", textStyle)
+    lcd.drawText(xLeft, yStart + 5 * lineHeight, "FMODE: " .. tostring(tlm.fmode), textStyle)
+    lcd.drawText(xLeft, yStart + 6 * lineHeight, "Time: " .. tostring(timer1Formatted), textStyle)
+
   end
 
 end
@@ -133,7 +146,6 @@ end
 
 return {
   name = "TXWidget",
-  options = {},
   create = create,
   update = update,
   refresh = refresh,

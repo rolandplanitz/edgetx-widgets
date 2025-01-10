@@ -34,7 +34,7 @@ local function create(zone, options)
 
   vcache = {}
 
-    -- stick labels and ids
+  -- stick labels and ids
 	sticks={
 		{name='A', id=getFieldInfo('ail').id},
 		{name='E', id=getFieldInfo('ele').id},
@@ -50,50 +50,6 @@ local function update(widget, options)
   widget.cfg = options
 end
 
-
-local function fieldGetString(data, off)
-  local startOff = off
-  while data[off] ~= 0 do
-    data[off] = string.char(data[off])
-    off = off + 1
-  end
-
-  return table.concat(data, nil, startOff, off - 1), off + 1
-end
-
-local function parseDeviceInfo(data)
-  if data[2] ~= 0xEE then return end -- only interested in TX info
-  local name, off = fieldGetString(data, 3)
-  mod.name = name
-  -- off = serNo ('ELRS') off+4 = hwVer off+8 = swVer
-  mod.vMaj = data[off+9]
-  mod.vMin = data[off+10]
-  mod.vRev = data[off+11]
-  mod.vStr = string.format("%s (%d.%d.%d)", mod.name, mod.vMaj, mod.vMin, mod.vRev)
-  return true
-end
-
-local function updateElrsVer()
-  local command, data = crossfireTelemetryPop()
-  if command == 0x29 then
-    if parseDeviceInfo(data) then
-      -- Get rid of all the functions, only update once
-      parseDeviceInfo = nil
-      fieldGetString = nil
-      updateElrsVer = nil
-      mod.lastUpd = nil
-    end
-    return
-  end
-
-  local now = getTime()
-  -- Poll the module every second
-  if (mod.lastUpd or 0) + 100 < now then
-    crossfireTelemetryPush(0x28, {0x00, 0xEA})
-    mod.lastUpd = now
-  end
-end
-
 local function drawSticks (x,y)
 	for _, st in ipairs (sticks) do
     lcd.drawText (x, y,
@@ -106,20 +62,14 @@ end
 
 local function refresh(widget, event, touchState)
 
-  if updateElrsVer then updateElrsVer() end
-  
-  -- Get model name
-  local modelName = model.getInfo().name or "Unknown"
-
 	-- Draw Model Name
-  lcd.drawText(xLeft, yStart, modelName, textStyle + MIDSIZE + BOLD)
-  
+  lcd.drawText(xLeft, yStart, "dbarrios83", textStyle + MIDSIZE + BOLD)
 
-  local tlm = { tpwr = getV("TPWR") }
-  local txName = mod.vStr or "Initializing"
-  lcd.drawText(xLeft, yStart + 2*lineHeight, txName, textStyle)
+  local txName = "Simulator"
   local vBatt = tonumber(getValue(idTxV)) or 0
-  lcd.drawText(xLeft + 55, yStart + 8 + 3*lineHeight, string.format("%.2fV", vBatt), textStyle + MIDSIZE)
+
+  lcd.drawText(xLeft, yStart + 2*lineHeight, txName, textStyle)
+  lcd.drawText(xLeft + 55, yStart + 8 + 3 * lineHeight, string.format("%.2fV", vBatt), textStyle + MIDSIZE)
   
   -- Determine battery icon based on RXBt vBatt
 	local iconPath = "/WIDGETS/ModelWidget/BMP/battery-%s.png"
@@ -143,7 +93,7 @@ local function refresh(widget, event, touchState)
 end
 
 return {
-  name = "ModelWidget",
+  name = "SimModel",
   options = {},
   create = create,
   update = update,
