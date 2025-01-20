@@ -38,12 +38,12 @@ EdgeTX widgets enhance the functionality of your transmitter, allowing you to cu
 The widgets are arranged on the transmitter’s screen using this layout  and screen configuration.
 Below is an example layout:
 
-![View Layout Example](path/to/view-layout-image.png)
+![View Layout Example](widgets/img/screes_config.jpeg)
 
 ### Widget Locations
 Place the widgets in the order specified on the next image. Location details:
 
-![Widget Locations](path/to/widget-locations-image.png) 
+![Widget Locations](widgets/img/widget_Layout.jpeg)
 
 ### 5. Test the Widget
 - Exit the configuration menu and ensure the widget displays or functions as expected.
