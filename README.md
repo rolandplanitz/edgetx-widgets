@@ -43,7 +43,7 @@ Below is an example layout:
 ### Widget Locations
 Place the widgets in the order specified on the next image. Location details:
 
-![Widget Locations](/widgets/img/widget_Layout.jpeg)
+![Widget Locations](/widgets/img/widget_Layout.jpg)
 
 ### 5. Test the Widget
 - Exit the configuration menu and ensure the widget displays or functions as expected.
