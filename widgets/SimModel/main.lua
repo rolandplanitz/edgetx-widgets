@@ -2,7 +2,9 @@
 local xLeft = 10
 local yStart = 5
 local lineHeight = 18
+local midLineHeight = 25
 local textStyle = WHITE + LEFT + SHADOWED
+local textStyleRight = RIGHT + WHITE + SHADOWED
 
 local idTxV
   
@@ -60,15 +62,10 @@ local function drawSticks (x,y)
 	end
 end
 
-local function refresh(widget, event, touchState)
+-- Function to draw the battery icon based on voltage
+local function drawBatteryIcon()
 
-	-- Draw Model Name
-  lcd.drawText(xLeft, yStart, "dbarrios83", textStyle + MIDSIZE + BOLD)
-
-  local txName = "Simulator"
   local vBatt = tonumber(getValue(idTxV)) or 0
-
-  lcd.drawText(xLeft, yStart + 2*lineHeight, txName, textStyle)
   lcd.drawText(xLeft + 55, yStart + 8 + 3 * lineHeight, string.format("%.2fV", vBatt), textStyle + MIDSIZE)
   
   -- Determine battery icon based on RXBt vBatt
@@ -85,10 +82,47 @@ local function refresh(widget, event, touchState)
 	end
 	local icon = Bitmap.open(string.format(iconPath, iconState))
 
-	-- Draw battery icon
+  -- Draw battery icon
 	lcd.drawBitmap(icon, xLeft - 2, yStart + 5 + 3*lineHeight)
 
-  drawSticks (xLeft - 2, yStart + 5 + 5*lineHeight)
+end
+
+local function drawDateAndTime(widget)
+
+  local datetime = getDateTime()
+  if not datetime then
+      lcd.drawText(widget.zone.x + 10, widget.zone.y + 10, "No Date/Time", MIDSIZE + RED)
+      return
+  end
+
+  -- Convert month to 3-letter abbreviation
+  local months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+  local monthStr = months[datetime.mon] or "???"
+
+  local timeStr = string.format("%02d:%02d", datetime.hour, datetime.min)
+  local dateStr = string.format("%02d %s", datetime.day, monthStr)
+
+  -- Define positions
+  local xRight = widget.zone.x + widget.zone.w - 10
+  local yStart = widget.zone.y + 5
+
+  -- Draw Date and Time Block
+  lcd.drawText(xRight, yStart, timeStr, textStyleRight + MIDSIZE)
+  lcd.drawText(xRight, yStart + midLineHeight, dateStr, textStyleRight)
+
+end
+
+local function refresh(widget, event, touchState)
+
+	-- Draw Model Name
+  lcd.drawText(xLeft, yStart, "dbarrios83", textStyle + MIDSIZE + BOLD)
+  lcd.drawText(xLeft, yStart + 2*lineHeight, "Simulator", textStyle)
+
+  drawBatteryIcon()
+
+  drawDateAndTime(widget)
+
+  --drawSticks (xLeft - 2, yStart + 5 + 5*lineHeight)
 
 end
 
@@ -100,4 +134,3 @@ return {
   refresh = refresh,
   options = {}
 }
-
