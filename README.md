@@ -15,16 +15,14 @@ EdgeTX widgets enhance the functionality of your transmitter, allowing you to cu
 
 ## Installation Steps
 
-### 1. Download the Widget
-1. Visit the official EdgeTX widget repository or the widget’s source (e.g., GitHub).
-2. Download the widget's `.zip` or `.lua` file package.
-3. Extract the files if they are zipped.
+### 1. Download the Widgets
+1. The widgets required are: BattWidget, ModelWidget, TXWidget, ClockWidget, and GPSWidget.
+2. Download the download all the folders.
 
-### 2. Copy Files to the SD Card
+### 2. Copy Folders to the SD Card
 1. Insert the SD card from your transmitter into your computer.
-2. Navigate to the following directory on the SD card:
-3. Create a new folder inside `/WIDGETS/` with the name of the widget (e.g., `MyWidget`).
-4. Copy the extracted widget files into this newly created folder.
+2. Navigate to the root directory on the SD card:
+3. Inside the folder `/WIDGETS/` Copy all 5 folders.
 
 ### 3. Load the Widget on the Transmitter
 1. Reinsert the SD card into your transmitter.
@@ -35,12 +33,20 @@ EdgeTX widgets enhance the functionality of your transmitter, allowing you to cu
 5. Choose the widget slot you want to use and assign the newly installed widget.
 
 ### 4. Configure the Widget
-1. Depending on the widget, you might need to adjust its settings:
-- Highlight the widget and press `Enter` to open the settings menu.
-- Customize parameters (e.g., units, telemetry sources, display options).
+1. The widgets locations are fixed right now.
+2. ## View Layout
+The widgets are arranged on the transmitter’s screen using this layout  and screen configuration.
+Below is an example layout:
+
+![View Layout Example](path/to/view-layout-image.png)
+
+### Widget Locations
+Place the widgets in the order specified on the next image. Location details:
+
+![Widget Locations](path/to/widget-locations-image.png) 
 
 ### 5. Test the Widget
-- Exit the configuration menu and ensure the widget is displaying or functioning as expected.
+- Exit the configuration menu and ensure the widget displays or functions as expected.
 
 ## Troubleshooting
 - **Widget Not Showing Up**: Ensure the widget folder is placed correctly under `/WIDGETS/` and contains all required files.
@@ -48,8 +54,8 @@ EdgeTX widgets enhance the functionality of your transmitter, allowing you to cu
 - **Compatibility**: Ensure the widget is compatible with your EdgeTX version.
 
 ## Uninstallation
-1. Navigate to the `/WIDGETS/` directory on your SD card.
-2. Delete the folder corresponding to the widget you wish to remove.
+1. Navigate to your SD card's `/WIDGETS/` directory.
+2. Delete the folders corresponding to the widget you wish to remove.
 
 ## Additional Resources
 - [EdgeTX Documentation](https://www.edgetx.org/documentation)
