@@ -5,19 +5,15 @@ local lineHeight = 18
 local textStyle = WHITE + LEFT + SHADOWED
 
   
--- Variables used across all instances
-local vcache -- valueId cache
 local mod = {} -- module info
 
 local function create(zone, options)
+  
   local widget = {
     zone = zone,
     cfg = options,
   }
 
-  local _, rv = getVersion()
-
-  vcache = {}
   return widget
 end
 

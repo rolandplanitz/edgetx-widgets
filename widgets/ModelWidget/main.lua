@@ -4,40 +4,33 @@ local yStart = 5
 local lineHeight = 18
 local textStyle = WHITE + LEFT + SHADOWED
 
-local idTxV
-  
--- Variables used across all instances
-local sticks 
-local mod = {} -- module info
 
-
+-- Function to create the widget
 local function create(zone, options)
-
-  local widget = {
-    zone = zone,
-    cfg = options,
+  return {
+      zone = zone,
+      cfg = options,
   }
+end
 
-  idTxV = getFieldInfo('tx-voltage').id
+local function update(widget, options)
+  widget.cfg = options
+end
 
-    -- stick labels and ids
-	sticks={
+
+local function drawSticks ()
+
+  x = xLeft
+  y = yStart + 5 + 5*lineHeight
+
+  -- stick labels and ids
+  sticks={
 		{name='A', id=getFieldInfo('ail').id},
 		{name='E', id=getFieldInfo('ele').id},
 		{name='T', id=getFieldInfo('thr').id},
 		{name='R', id=getFieldInfo('rud').id},
   }
 
-  return widget
-end
-
-local function update(widget, options)
-  -- Runs if options are changed from the Widget Settings menu
-  widget.cfg = options
-end
-
-
-local function drawSticks (x,y)
 	for _, st in ipairs (sticks) do
     lcd.drawText (x, y,
       st.name .. ":" .. math.floor (0.5 + getValue(st.id)/10.24),
@@ -47,22 +40,9 @@ local function drawSticks (x,y)
 	end
 end
 
-local function refresh(widget, event, touchState)
-  
-  -- Get model name
-  local modelName = model.getInfo().name or "Unknown"
+local function drawBattery ()
 
-	-- Draw Model Name
-  lcd.drawText(xLeft, yStart, modelName, textStyle + MIDSIZE + BOLD)
-  
-  --local txName = mod.vStr or "Initializing"
-
-    -- o/s version
-	local _, _, major, minor, rev, osname = getVersion()
-	strVer = (osname or "EdgeTX") .. " " .. major .. "." .. minor.. "." .. rev
-
-
-  lcd.drawText(xLeft, yStart + 2*lineHeight, strVer, textStyle + SMLSIZE)
+  idTxV = getFieldInfo('tx-voltage').id
   local vBatt = tonumber(getValue(idTxV)) or 0
   lcd.drawText(xLeft , yStart + 8 + 3*lineHeight, string.format("%.1fV", vBatt), textStyle + MIDSIZE)
   
@@ -83,7 +63,33 @@ local function refresh(widget, event, touchState)
 	-- Draw battery icon
 	lcd.drawBitmap(icon, xLeft + 55 , yStart + 5 + 3*lineHeight)
 
-  drawSticks (xLeft, yStart + 5 + 5*lineHeight)
+
+end
+
+
+local function drawModelInfo ()
+
+  -- Get model name
+  local modelName = model.getInfo().name or "Unknown"
+
+	-- Draw Model Name
+  lcd.drawText(xLeft, yStart, modelName, textStyle + MIDSIZE + BOLD)
+  
+    -- o/s version
+	local _, _, major, minor, rev, osname = getVersion()
+	strVer = (osname or "EdgeTX") .. " " .. major .. "." .. minor.. "." .. rev
+
+  lcd.drawText(xLeft, yStart + 2*lineHeight, strVer, textStyle + SMLSIZE)
+
+end
+
+local function refresh(widget, event, touchState)
+
+  drawBattery()
+
+  drawModelInfo()
+
+  drawSticks ()
 
 end
 
