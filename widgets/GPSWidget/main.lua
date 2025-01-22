@@ -4,7 +4,7 @@
 
 
 local textStyle = RIGHT + WHITE + SHADOWED
-local midLineHeight = 25
+local midLineHeight = 33
 local lineHeight = 18
 
 
@@ -47,8 +47,7 @@ local function refresh(widget, event, touchState)
 
 		-- Define positions
 		local xRight = widget.zone.x + widget.zone.w - 10
-		local xLeft = widget.zone.x + 10
-		local yStart = widget.zone.y + 35
+		local yStart = widget.zone.y + 5
 		
 		-- Get telemetry data
 		local sats = tonumber(getValue("Sats")) or 0
@@ -84,23 +83,18 @@ local function refresh(widget, event, touchState)
 			iconColor = "green"
 		end
 		local icon = Bitmap.open(string.format(iconPath, iconColor))
-		lcd.drawBitmap(icon, xRight-40, yStart - 35)
+		lcd.drawBitmap(icon, xRight-22, yStart)
 
 		-- Format latitude and longitude
 		local latStr, lonStr = formatLatLon(latitude, longitude)
 
 		-- Draw GPS Data
-		lcd.drawText(xRight, yStart, string.format("Sats: %d", sats), textStyle  + MIDSIZE)
+		lcd.drawText(xRight - 35, yStart + 2, string.format("Sats: %d", sats), textStyle  + MIDSIZE)
 		lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
 		lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)
 	
     end
 
-
-end
-
-local function background(widget)
-    -- No background tasks needed for this widget
 end
 
 return {
@@ -108,6 +102,5 @@ return {
     options = {},
     create = create,
     update = update,
-    refresh = refresh,
-    background = background,
+    refresh = refresh
 }

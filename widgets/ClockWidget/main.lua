@@ -64,12 +64,12 @@ local function refresh(widget, event, touchState)
 
     -- Draw connection icon
     local icon = Bitmap.open(string.format(iconPath, iconState))
-    lcd.drawBitmap(icon, xRight - 100, yStart + 5)
+    lcd.drawBitmap(icon, xRight - 85, yStart + 2)
 
 
     -- Draw Date and Time Block
-    lcd.drawText(xRight, yStart, timeStr, textStyle + MIDSIZE)
-    lcd.drawText(xRight, yStart + midLineHeight, dateStr, textStyle)
+    lcd.drawText(xRight, yStart, timeStr, textStyle)
+    lcd.drawText(xRight, yStart + lineHeight, dateStr, textStyle)
 end
 
 return {

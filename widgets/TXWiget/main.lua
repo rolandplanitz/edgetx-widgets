@@ -9,18 +9,6 @@ local textStyle = WHITE + LEFT + SHADOWED
 local vcache -- valueId cache
 local mod = {} -- module info
 
-local function getV(id)
-  -- Return the getValue of ID or nil if it does not exist
-  local cid = vcache[id]
-  if cid == nil then
-    local info = getFieldInfo(id)
-    -- use 0 to prevent future lookups
-    cid = info and info.id or 0
-    vcache[id] = cid
-  end
-  return cid ~= 0 and getValue(cid) or nil
-end
-
 local function create(zone, options)
   local widget = {
     zone = zone,
@@ -45,20 +33,38 @@ local function formatTime(seconds)
   return string.format("%02d:%02d", minutes, remainingSeconds)
 end
 
+-- Function to format RSSI values
+local function formatRSSI(rssi1, rssi2)
+  if rssi1 == 0 and rssi2 == 0 then
+      return "RSSI: 0dBm"
+  elseif rssi1 ~= 0 and rssi2 == 0 then
+      return "RSSI1: " .. rssi1 .. "dBm"
+  elseif rssi2 ~= 0 and rssi1 == 0 then
+      return "RSSI2: " .. rssi2 .. "dBm"
+  else
+      return "RSSI1: " .. rssi1 .. "dBm; RSSI2: " .. rssi2 .. "dBm"
+  end
+end
 
 local function drawRfTelemetryText(widget, tlm)
   
-  local tlm = { tpwr = getV("TPWR") }
+  local tlm = { tpwr = getValue("TPWR") or 0 }
   
   if tlm.tpwr == nil or tlm.tpwr == 0 then
     lcd.drawText(xLeft, yStart + lineHeight, "No RX Connected", textStyle)
     widget.ctx = nil
   else
 
-    tlm.rfmd = getV("RFMD") tlm.rssi1 = getV("1RSS") tlm.rssi2 = getV("2RSS") tlm.rqly = getV("RQly") tlm.ant = getV("ANT")
+    tlm.rfmd = getValue("RFMD")
+    tlm.rssi1 = tonumber(getValue("1RSS")) 
+    tlm.rssi2 = tonumber(getValue("2RSS"))
+    tlm.rqly = getValue("RQly") 
+    tlm.ant = getValue("ANT")
+
     local modestr = (mod.RFMOD and mod.RFMOD[tlm.rfmd+1]) or ("RFMD" .. tostring(tlm.rfmd)) 
-    local rssi = (tlm.ant == 1) and tlm.rssi2 or tlm.rssi1
-    tlm.fmode = getV("FM") or 0
+    local rssi = formatRSSI(tlm.rssi1, tlm.rssi2)
+
+    tlm.fmode = getValue("FM") or 0
 
     local rfmd = getValue ("RFMD") 
     idTmr1 = getFieldInfo('timer1').id
@@ -69,7 +75,7 @@ local function drawRfTelemetryText(widget, tlm)
     lcd.drawText(xLeft, yStart + lineHeight, "Power: " .. tostring(tlm.tpwr) .. "mW", textStyle)
     lcd.drawText(xLeft, yStart + 2 * lineHeight, "RFMD: " .. tostring(modestr), textStyle)
     lcd.drawText(xLeft, yStart + 3 * lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
-    lcd.drawText(xLeft, yStart + 4 * lineHeight, "RSSI: " .. tostring(rssi) .. "dBm", textStyle)
+    lcd.drawText(xLeft, yStart + 4 * lineHeight, rssi, textStyle)
     lcd.drawText(xLeft, yStart + 5 * lineHeight, "FMODE: " .. tostring(tlm.fmode), textStyle)
     lcd.drawText(xLeft, yStart + 6 * lineHeight, "Time: " .. tostring(timer1Formatted), textStyle)
 
