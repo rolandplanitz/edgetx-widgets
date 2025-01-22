@@ -24,12 +24,12 @@ local function getVoltagePerCell(rxBt)
 
         -- Ensure the average voltage per cell is within a reasonable range
         if averageVoltagePerCell >= minCellVoltage and averageVoltagePerCell <= maxCellVoltage then
-            return averageVoltagePerCell
+            return averageVoltagePerCell, estimatedCellCount
         else
-            return rxBt
+            return rxBt, 1
         end
     else
-        return rxBt
+        return rxBt, 1
     end
 end
 
@@ -39,8 +39,12 @@ local function drawBatteryTelemetry(widget)
 	local xRight = widget.zone.x + widget.zone.w - 10
 	local xLeft = widget.zone.x + 10
 	local yStart = widget.zone.y + 15
-		
-	local rxBt = tonumber(getVoltagePerCell(tonumber(getValue("RxBt")) or 0))
+	
+	local totalBatt = tonumber(tonumber(getValue("RxBt"))) or 0
+
+	local voltagePerCell, cellCount = getVoltagePerCell(totalBatt)
+	local rxBt = tonumber(voltagePerCell) or 0
+
 	local curr = tonumber(getValue("Curr")) or 0
 	local capa = tonumber(getValue("Capa")) or 0
 
@@ -64,8 +68,13 @@ local function drawBatteryTelemetry(widget)
 	lcd.drawBitmap(icon, xRight - 22, yStart - 2)
 
 	-- Draw RXBt
-	lcd.drawText(xRight - 29 , yStart + 2, string.format("%.1fV", rxBt), textStyle + MIDSIZE)
 
+	if cellCount > 1 then
+		lcd.drawText(xRight - 29 , yStart - 4, string.format("%.1fV", rxBt), textStyle)
+		lcd.drawText(xRight - 26 , yStart - 4 + lineHeight, cellCount .. "S ", textStyle)
+	else
+		lcd.drawText(xRight - 29 , yStart + 2, string.format("%.1fV", rxBt), textStyle + MIDSIZE) 
+	end
 	-- Draw Curr
 	lcd.drawText(xRight, yStart + midLineHeight, string.format("Curr: %.2fA", curr), textStyle)
 
