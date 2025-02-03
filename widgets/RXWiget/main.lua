@@ -147,7 +147,7 @@ local function refresh(widget, event, touchState)
 end
 
 return {
-  name = "TXWidget",
+  name = "RXWidget",
   create = create,
   update = update,
   refresh = refresh,
