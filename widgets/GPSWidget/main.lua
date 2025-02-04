@@ -13,6 +13,11 @@ local function create(zone, options)
     return {
         zone = zone,
         cfg = options,
+		update = true,
+		gpsSATS = 0,
+		gpsLAT = 0,
+		gpsLON = 0,
+		isGPSValid = true,
     }
 end
 
@@ -43,57 +48,65 @@ local function refresh(widget, event, touchState)
     -- Check if RX is connected using telemetry link quality (LQ)
 	local tpwr = tonumber(getValue("TPWR")) or 0
   
-	if tpwr > 0 then
+	--if tpwr > 0 then
 
 		-- Define positions
 		local xRight = widget.zone.x + widget.zone.w - 10
 		local yStart = widget.zone.y + 5
 		
 		-- Get telemetry data
-		local sats = tonumber(getValue("Sats")) or 0
-		local gpsLatLon = getValue("GPS")
+		widget.gpsSATS = tonumber(getValue("Sats")) or 0
+		widget.gpsLatLon = getValue("GPS")
 
-		-- Validate GPS data
-		if type(gpsLatLon) ~= "table" then
-			lcd.drawText(xRight, yStart, "No GPS", textStyle  + MIDSIZE)
-			return
-		end
 
-		local latitude = gpsLatLon.lat or 0
-		local longitude = gpsLatLon.lon or 0
-
-		-- Determine color based on satellite count
-		local color
-		if sats <= 5 then
-			color = RED
-		elseif sats <= 7 then
-			color = YELLOW
+		if (type(widget.gpsLatLon) == "table") then 			
+			widget.gpsLAT = widget.gpsLatLon.lat or 0
+			widget.gpsLON = widget.gpsLatLon.lon or 0	
+			widget.isGPSValid = true	
+			widget.update = true
 		else
-			color = GREEN
+			widget.isGPSValid = false
+			widget.update = false
 		end
 
 		-- Draw satellite icon
 		local iconPath = "/WIDGETS/GPSWidget/BMP/satellite-%s.png"
 		local iconColor
-		if sats <= 5 then
+		if widget.gpsSATS <= 5 then
+			color = RED
 			iconColor = "red"
-		elseif sats <= 7 then
+		elseif widget.gpsSATS <= 7 then
+			color = YELLOW
 			iconColor = "yellow"
 		else
+			color = GREEN
 			iconColor = "green"
 		end
-		local icon = Bitmap.open(string.format(iconPath, iconColor))
-		lcd.drawBitmap(icon, xRight-22, yStart)
+
 
 		-- Format latitude and longitude
-		local latStr, lonStr = formatLatLon(latitude, longitude)
+		local latStr, lonStr = formatLatLon(widget.gpsLAT, widget.gpsLON)
 
 		-- Draw GPS Data
-		lcd.drawText(xRight - 35, yStart + 2, string.format("Sats: %d", sats), textStyle  + MIDSIZE)
-		lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
-		lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)
+
+		if widget.isGPSValid then
+			local icon = Bitmap.open(string.format(iconPath, iconColor))
+			lcd.drawBitmap(icon, xRight-22, yStart)
+			lcd.drawText(xRight - 35, yStart + 2, string.format("Sats: %d", widget.gpsSATS), textStyle  + MIDSIZE)
+			lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
+			lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)
+		else
+			if widget.gpsLAT == 0 and widget.gpsLON == 0 then
+				lcd.drawText(xRight - 35, yStart + 2, "No GPS", textStyle + MIDSIZE)
+			else
+				lcd.drawText(xRight + 10, yStart + 2, "Last location: ", textStyle + MIDSIZE)
+				lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
+				lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)
+			end
+		end
+
 	
-    end
+    --end
 
 end
 
