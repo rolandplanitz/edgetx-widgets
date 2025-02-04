@@ -32,17 +32,7 @@ local function create(zone, options)
 
   idTxV = getFieldInfo('tx-voltage').id
   local _, rv = getVersion()
-  widget.DEBUG = string.sub(rv, -5) == "-simu"
 
-  vcache = {}
-
-  -- stick labels and ids
-	sticks={
-		{name='A', id=getFieldInfo('ail').id},
-		{name='E', id=getFieldInfo('ele').id},
-		{name='T', id=getFieldInfo('thr').id},
-		{name='R', id=getFieldInfo('rud').id},
-  }
 
   return widget
 end
@@ -52,24 +42,31 @@ local function update(widget, options)
   widget.cfg = options
 end
 
-local function drawSticks (x,y)
-	for _, st in ipairs (sticks) do
-    lcd.drawText (x, y,
-      st.name .. ":" .. math.floor (0.5 + getValue(st.id)/10.24),
-      textStyle
-      )
-    x = x + 50
-	end
+local function drawModelInfo()
+
+  -- Get model name
+  local modelName = "dbarrios83"
+
+	-- Draw Model Name
+  lcd.drawText(xLeft, yStart, modelName, textStyle + MIDSIZE + BOLD)
+  
+    -- o/s version
+	local _, _, major, minor, rev, osname = getVersion()
+	strVer = "Simulator. " .. (osname or "EdgeTX") .. " " .. major .. "." .. minor.. "." .. rev
+
+  lcd.drawText(xLeft, yStart + 2*lineHeight, strVer, textStyle + SMLSIZE)
+
 end
 
 -- Function to draw the battery icon based on voltage
-local function drawBatteryIcon()
+local function drawBattery()
 
+  idTxV = getFieldInfo('tx-voltage').id
   local vBatt = tonumber(getValue(idTxV)) or 0
-  lcd.drawText(xLeft + 55, yStart + 8 + 3 * lineHeight, string.format("%.2fV", vBatt), textStyle + MIDSIZE)
+  lcd.drawText(xLeft , yStart + 8 + 3*lineHeight, string.format("%.1fV", vBatt), textStyle + MIDSIZE)
   
   -- Determine battery icon based on RXBt vBatt
-	local iconPath = "/WIDGETS/ModelWidget/BMP/battery-%s.png"
+	local iconPath = "/WIDGETS/SimModel/BMP/battery-%s.png"
 	local iconState
   if vBatt < 7.1 then
 		iconState = "low"
@@ -82,8 +79,9 @@ local function drawBatteryIcon()
 	end
 	local icon = Bitmap.open(string.format(iconPath, iconState))
 
-  -- Draw battery icon
-	lcd.drawBitmap(icon, xLeft - 2, yStart + 5 + 3*lineHeight)
+	-- Draw battery icon
+	lcd.drawBitmap(icon, xLeft + 55 , yStart + 5 + 3*lineHeight)
+
 
 end
 
@@ -114,17 +112,14 @@ end
 
 local function refresh(widget, event, touchState)
 
-	-- Draw Model Name
-  lcd.drawText(xLeft, yStart, "dbarrios83", textStyle + MIDSIZE + BOLD)
-  lcd.drawText(xLeft, yStart + 2*lineHeight, "Simulator", textStyle)
+  drawModelInfo()
 
-  drawBatteryIcon()
+  drawBattery()
 
   drawDateAndTime(widget)
 
-  --drawSticks (xLeft - 2, yStart + 5 + 5*lineHeight)
-
 end
+
 
 return {
   name = "SimModel",
