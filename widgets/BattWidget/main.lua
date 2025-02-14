@@ -97,12 +97,11 @@ end
 
 local function refresh(widget, event, touchState)
 
-
 	local tpwr = tonumber(getValue("TPWR")) or 0
   
 	if tpwr > 0 then
 
-		-- Get telemetry data
+		-- draw telemetry data
 		drawBatteryTelemetry(widget)
 		
 	end
