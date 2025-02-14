@@ -70,10 +70,10 @@ local function drawBatteryTelemetry(widget)
 	-- Draw RXBt
 
 	if cellCount > 1 then
-		lcd.drawText(xRight - 29 , yStart - 4, string.format("%.1fV", rxBt), textStyle)
-		lcd.drawText(xRight - 26 , yStart - 4 + lineHeight, cellCount .. "S ", textStyle)
+		lcd.drawText(xRight - 25, yStart + 2 , string.format("%.2fV", rxBt) .. "-" .. cellCount .. "S ", textStyle + MIDSIZE)
+		--lcd.drawText(xRight - 26 , yStart - 4 + lineHeight, cellCount .. "S ", textStyle)
 	else
-		lcd.drawText(xRight - 29 , yStart + 2, string.format("%.1fV", rxBt), textStyle + MIDSIZE) 
+		lcd.drawText(xRight - 29, yStart + 2, string.format("%.1fV", rxBt), textStyle + MIDSIZE) 
 	end
 	-- Draw Curr
 	lcd.drawText(xRight, yStart + midLineHeight, string.format("Curr: %.2fA", curr), textStyle)
