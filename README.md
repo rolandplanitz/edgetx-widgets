@@ -48,13 +48,58 @@ Below is an example layout:
 
 ![View Layout Example](/widgets/img/screen_config.jpeg)
 
+
+
+### 6. Test the Widget
+- Exit the configuration menu and ensure the widget displays or functions as expected.
+
+## Configuring Models with Different Layouts
+
+### ELRS Model
+
 ### Widget Locations
 Place the widgets in the order specified on the next image. Location details:
 
 ![Widget Locations](/widgets/img/widget_layout.jpg)
 
-### 6. Test the Widget
-- Exit the configuration menu and ensure the widget displays or functions as expected.
+For the ELRS Receiver model, configure the following widgets:
+
+1. **ModelWidget**
+2. **ClockWidget**
+3. **BattWidget**
+4. **RXWidget**
+5. **GPSWidget**
+
+### Simulator Model
+For the Simulator model, configure the following widgets:
+
+### Widget Locations
+Place the widgets in the order specified on the next image. Location details:
+
+![Widget Locations](/widgets/img/widget_layout_sim.jpg)
+
+1. **SimModel**
+2. **SimStickLayout**
+
+### Steps to Configure a New Model
+
+1. **Create a New Model**:
+   - Navigate to the **Model Settings** on your transmitter.
+   - Select **Create New Model** and follow the prompts to set up the new model.
+
+2. **Configure the Layout**:
+   - Access the **Widgets Setup** page for the new model.
+   - Long press the `Page` button until you see the screen layout setup.
+   - Select a screen or add a new one.
+   - Choose the widget slots you want to use and assign the appropriate widgets for the model (ELRS or Simulator).
+
+3. **Assign Widgets**:
+   - For each widget slot, select the widget you want to assign (e.g., `ModelWidget`, `ClockWidget`, `BattWidget`, `RXWidget`, `GPSWidget` for ELRS model or `SimModel`, `SimStickLayout` for Simulator model).
+   - Configure the widget options as needed.
+
+4. **Save and Test**:
+   - Exit the configuration menu and ensure the widgets display or function as expected.
+   - Make any necessary adjustments to the layout or widget options.
 
 ## Known Issues
 - **BetaFPV Flight Controllers**: Some BetaFPV flight controllers (e.g., Air 65 or Air 75) report battery 0V RxBT. This may cause the voltage to not display properly. Ensure that if a metric is not displayed, it appears in the telemetry; otherwise, it will not be shown.
