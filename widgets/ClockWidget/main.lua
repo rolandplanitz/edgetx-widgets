@@ -8,13 +8,35 @@ local lineHeight = 18
 local function create(zone, options)
     return {
         zone = zone,
-        cfg = options,
+        options = options,
     }
 end
 
 -- Function to update the widget configuration
 local function update(widget, options)
-    widget.cfg = options
+    widget.options = options
+end
+
+-- Function to get the formatted time
+local function getFormattedTime(datetime, is24Hour)
+    local hour = datetime.hour
+    local amPm = ""
+
+    if not is24Hour then
+        if hour == 0 then
+            hour = 12
+            amPm = " AM"
+        elseif hour == 12 then
+            amPm = " PM"
+        elseif hour > 12 then
+            hour = hour - 12
+            amPm = " PM"
+        else
+            amPm = " AM"
+        end
+    end
+
+    return string.format("%02d:%02d%s", hour, datetime.min, is24Hour and "" or amPm)
 end
 
 -- Function to refresh the widget display
@@ -55,7 +77,11 @@ local function refresh(widget, event, touchState)
     local months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
     local monthStr = months[datetime.mon] or "???"
 
-    local timeStr = string.format("%02d:%02d", datetime.hour, datetime.min)
+    -- Determine time format
+    local is24Hour = widget.options.Format24H == 1 -- Check the TimeFormat option
+
+    -- Get the formatted time string
+    local timeStr = getFormattedTime(datetime, is24Hour)
     local dateStr = string.format("%02d %s", datetime.day, monthStr)
 
     -- Define positions
@@ -63,8 +89,18 @@ local function refresh(widget, event, touchState)
     local yStart = widget.zone.y + 5
 
     -- Draw connection icon
+    local iconRight
+    if is24Hour then
+        iconRight = xRight - 85
+    else
+        iconRight = xRight - 110
+    end
+
+     
+
+
     local icon = Bitmap.open(string.format(iconPath, iconState))
-    lcd.drawBitmap(icon, xRight - 85, yStart + 2)
+    lcd.drawBitmap(icon, iconRight, yStart + 2)
 
 
     -- Draw Date and Time Block
@@ -78,4 +114,7 @@ return {
     create = create,
     update = update,
     refresh = refresh,
+    options = {
+        {"Format24H", BOOL, 1}, -- 1 for 24-hour, 0 for 12-hour
+      },
 }
