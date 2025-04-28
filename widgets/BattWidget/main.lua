@@ -1,93 +1,79 @@
--- Widget LUA Script: Battery Widget
--- Displays RXBt, Curr, and Capa values with specific behaviors and icons
-
+-- Battery Widget Optimized with Preloading and Destroy
 local textStyle = RIGHT + WHITE + SHADOWED
 local midLineHeight = 33
 local lineHeight = 18
 
--- Function to get the voltage per cell using the vbat as input
 local function getVoltagePerCell(rxBt)
-    -- Define the typical voltage range for a LiPo cell
-	local maxCellVoltage = 4.35
+    local maxCellVoltage = 4.35
     local minCellVoltage = 3.0
 
-    -- Check if vbat is greater than a minimum threshold to be considered a valid battery voltage
     if rxBt > 5 then
-        -- Calculate the estimated cell count
-
-
-		-- try to lock on to the cell count, so as the voltage sags we don't change S
-		local estimatedCellCount = math.floor(rxBt / maxCellVoltage) + 1  -- At least 1 cell
-
-        -- Calculate the average voltage per cell
+        local estimatedCellCount = math.floor(rxBt / maxCellVoltage) + 1
         local averageVoltagePerCell = rxBt / estimatedCellCount
 
-        -- Ensure the average voltage per cell is within a reasonable range
         if averageVoltagePerCell >= minCellVoltage and averageVoltagePerCell <= maxCellVoltage then
             return averageVoltagePerCell, estimatedCellCount
-        else
-            return rxBt, 1
         end
-    else
-        return rxBt, 1
     end
+    return rxBt, 1
 end
 
 local function drawBatteryTelemetry(widget)
+    local xRight = widget.zone.x + widget.zone.w - 10
+    local yStart = widget.zone.y + 15
 
-	-- Define positions
-	local xRight = widget.zone.x + widget.zone.w - 10
-	local xLeft = widget.zone.x + 10
-	local yStart = widget.zone.y + 15
-	
-	local totalBatt = tonumber(tonumber(getValue("RxBt"))) or 0
+    local totalBatt = tonumber(getValue("RxBt")) or 0
+    local voltagePerCell, cellCount = getVoltagePerCell(totalBatt)
+    local rxBt = tonumber(voltagePerCell) or 0
 
-	local voltagePerCell, cellCount = getVoltagePerCell(totalBatt)
-	local rxBt = tonumber(voltagePerCell) or 0
+    local curr = tonumber(getValue("Curr")) or 0
+    local capa = tonumber(getValue("Capa")) or 0
 
-	local curr = tonumber(getValue("Curr")) or 0
-	local capa = tonumber(getValue("Capa")) or 0
+    -- Select icon based on voltage per cell
+    local icon
+    if rxBt < 3.2 then
+        icon = widget.icons.dead
+    elseif rxBt < 3.6 then
+        icon = widget.icons.low
+    elseif rxBt < 3.8 then
+        icon = widget.icons.yellow
+    elseif rxBt < 4.0 then
+        icon = widget.icons.ok
+    else
+        icon = widget.icons.full
+    end
 
-	-- Determine battery icon based on RXBt value
-	local iconPath = "/WIDGETS/BattWidget/BMP/battery-%s.png"
-	local iconState
-	if rxBt < 3.2 then
-		iconState = "dead"
-	elseif rxBt < 3.6 then
-		iconState = "low"
-	elseif rxBt < 3.8 then
-		iconState = "yellow"
-	elseif rxBt < 4.0 then
-		iconState = "ok"
-	else
-		iconState = "full"
-	end
-	local icon = Bitmap.open(string.format(iconPath, iconState))
+    if icon then
+        lcd.drawBitmap(icon, xRight - 22, yStart - 2)
+    end
 
-	-- Draw battery icon
-	lcd.drawBitmap(icon, xRight - 22, yStart - 2)
+    -- Draw voltage text
+    if cellCount > 1 then
+        lcd.drawText(xRight - 25, yStart + 2, string.format("%.2fV", rxBt) .. "-" .. cellCount .. "S", textStyle + MIDSIZE)
+    else
+        lcd.drawText(xRight - 29, yStart + 2, string.format("%.1fV", rxBt), textStyle + MIDSIZE)
+    end
 
-	-- Draw RXBt
-
-	if cellCount > 1 then
-		lcd.drawText(xRight - 25, yStart + 2 , string.format("%.2fV", rxBt) .. "-" .. cellCount .. "S ", textStyle + MIDSIZE)
-		--lcd.drawText(xRight - 26 , yStart - 4 + lineHeight, cellCount .. "S ", textStyle)
-	else
-		lcd.drawText(xRight - 29, yStart + 2, string.format("%.1fV", rxBt), textStyle + MIDSIZE) 
-	end
-	-- Draw Curr
-	lcd.drawText(xRight, yStart + midLineHeight, string.format("Curr: %.2fA", curr), textStyle)
-
-	-- Draw Capa
-	lcd.drawText(xRight, yStart + midLineHeight + lineHeight, string.format("Cap: %dmAh", capa), textStyle)
-
+    -- Draw current and capacity
+    lcd.drawText(xRight, yStart + midLineHeight, string.format("Curr: %.2fA", curr), textStyle)
+    lcd.drawText(xRight, yStart + midLineHeight + lineHeight, string.format("Cap: %dmAh", capa), textStyle)
 end
 
--- Function to create the widget
 local function create(zone, options)
+    -- Preload icons once during widget creation
+    local iconPath = "/WIDGETS/BattWidget/BMP/battery-%s.png"
+    local icons = {
+        dead = Bitmap.open(string.format(iconPath, "dead")),
+        low = Bitmap.open(string.format(iconPath, "low")),
+        yellow = Bitmap.open(string.format(iconPath, "yellow")),
+        ok = Bitmap.open(string.format(iconPath, "ok")),
+        full = Bitmap.open(string.format(iconPath, "full")),
+    }
+
     return {
         zone = zone,
         cfg = options,
+        icons = icons,
     }
 end
 
@@ -96,16 +82,20 @@ local function update(widget, options)
 end
 
 local function refresh(widget, event, touchState)
+    local tpwr = tonumber(getValue("TPWR")) or 0
+    if tpwr > 0 then
+        drawBatteryTelemetry(widget)
+    end
+end
 
-	local tpwr = tonumber(getValue("TPWR")) or 0
-  
-	if tpwr > 0 then
-
-		-- draw telemetry data
-		drawBatteryTelemetry(widget)
-		
-	end
-	
+local function destroy(widget)
+    -- Clean up bitmaps when widget is destroyed
+    for key, bmp in pairs(widget.icons or {}) do
+        if bmp and bmp.delete then
+            bmp:delete()
+        end
+    end
+    widget.icons = nil
 end
 
 return {
@@ -114,5 +104,5 @@ return {
     create = create,
     update = update,
     refresh = refresh,
-
+    destroy = destroy,  -- Important to release memory
 }
