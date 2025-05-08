@@ -1,4 +1,4 @@
--- SimStickLayout Widget: Displays stick positions visually with A-E and T-R axes
+-- SimStick Widget: Displays stick positions visually with A-E and T-R axes
 local textStyle = WHITE + SHADOWED
 local midLineHeight = 25
 local lineHeight = 18
@@ -16,7 +16,7 @@ local fieldInfo = {
 -- Stick layout definitions
 local sticks = {
     {name = 'A', idX = fieldInfo.ail, idY = fieldInfo.ele, align = RIGHT},
-    {name = 'T', idX = fieldInfo.thr, idY = fieldInfo.rud, align = LEFT}
+    {name = 'T', idX = fieldInfo.rud, idY = fieldInfo.thr, align = LEFT}
 }
 
 local stickValues = {
@@ -28,15 +28,14 @@ local stickValues = {
 
 -- Widget create function
 local function create(zone, options)
-    local widget = {
+    return {
         zone = zone,
         cfg = options or {},
         DEBUG = string.sub(select(2, getVersion()), -5) == "-simu"
     }
-    return widget
 end
 
--- Widget update (required to avoid nil error)
+-- Widget update (required)
 local function update(widget, options)
     widget.cfg = options
 end
@@ -83,8 +82,8 @@ local function drawSticks(widget)
     end
 
     -- T-R chart (left) and A-E chart (right)
-    drawAxesAndStick(centerX - 80, centerY, sticks[2].idX, sticks[2].idY)
-    drawAxesAndStick(centerX + 60, centerY, sticks[1].idX, sticks[1].idY)
+    drawAxesAndStick(centerX - 80, centerY, sticks[2].idX, sticks[2].idY)  -- R = X, T = Y
+    drawAxesAndStick(centerX + 60, centerY, sticks[1].idX, sticks[1].idY)  -- A = X, E = Y
 end
 
 -- Main refresh function
@@ -95,7 +94,7 @@ end
 
 -- Widget registration
 return {
-    name = "SimStickLayout",
+    name = "SimStick",
     options = {},
     create = create,
     update = update,
