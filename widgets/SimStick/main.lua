@@ -5,6 +5,14 @@ local lineHeight = 18
 local xLeft = 10
 local yStart = 5
 
+local options = {
+  -- move values down
+  { "values_down", BOOL, 0 },
+
+  -- move sticks out
+  { "sticks_out", BOOL, 0 },
+}
+
 -- Stick field IDs (initialized once)
 local fieldInfo = {
     rud = getFieldInfo('rud').id,
@@ -69,6 +77,16 @@ local function drawSticks(widget)
     local centerX = widget.zone.x + widget.zone.w / 2
     local centerY = widget.zone.y + widget.zone.h / 2 + 10
 
+    local leftX = centerX - 80
+    local rightX = centerX + 60
+
+    -- move sticks slighly up
+    if widget.cfg.sticks_out == 1 then
+      centerY = centerY - 15
+      leftX = leftX - 100
+      rightX = rightX + 120
+    end
+
     local function drawAxesAndStick(posX, posY, idX, idY)
         for i = -1, 1 do
             lcd.drawLine(posX - axisLength, posY + i, posX + axisLength, posY + i, SOLID, WHITE)
@@ -82,20 +100,25 @@ local function drawSticks(widget)
     end
 
     -- T-R chart (left) and A-E chart (right)
-    drawAxesAndStick(centerX - 80, centerY, sticks[2].idX, sticks[2].idY)  -- R = X, T = Y
-    drawAxesAndStick(centerX + 60, centerY, sticks[1].idX, sticks[1].idY)  -- A = X, E = Y
+    drawAxesAndStick(leftX, centerY, sticks[2].idX, sticks[2].idY)  -- R = X, T = Y
+    drawAxesAndStick(rightX, centerY, sticks[1].idX, sticks[1].idY)  -- A = X, E = Y
 end
 
 -- Main refresh function
 local function refresh(widget, event, touchState)
     drawSticks(widget)
-    drawStickValues(xLeft + 30, yStart)
+
+    if widget.cfg.values_down == 0 then
+      drawStickValues(xLeft + 30, yStart)
+    else
+      drawStickValues(xLeft + 30, 130)
+    end
 end
 
 -- Widget registration
 return {
     name = "SimStick",
-    options = {},
+    options = options,
     create = create,
     update = update,
     refresh = refresh,

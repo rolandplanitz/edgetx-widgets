@@ -6,8 +6,21 @@ local xLeft = 10
 local yStart = 5
 local lineHeight = 18
 local midLineHeight = 25
-local textStyle = WHITE + LEFT + SHADOWED
+local textStyle = LEFT + WHITE + SHADOWED
 local textStyleRight = RIGHT + WHITE + SHADOWED
+
+local options = {
+  -- show ISO 8601 Timestamp (%Y-%m-%d %H:%M)
+  -- instead of two lines with date and time
+  { "iso8601", BOOL, 0 },
+
+  -- show timers below timestamp
+  -- only shows ones with mode other than 'off'
+  { "timers", BOOL, 0 },
+
+  -- show "Simulator" from below model name
+  { "sim_designator", BOOL, 1 },
+}
 
 local idTxV
 
@@ -46,14 +59,19 @@ end
 
 local function drawModelInfo(widget)
   -- Get model name from options or use default
-    local modelName = model.getInfo().name
+  local modelName = model.getInfo().name
 
   -- Draw Model Name
   lcd.drawText(xLeft, yStart, modelName, textStyle + MIDSIZE + BOLD)
-  
+
   -- o/s version
   local _, _, major, minor, rev, osname = getVersion()
-  local strVer = "Simulator. " .. (osname or "EdgeTX") .. " " .. major .. "." .. minor .. "." .. rev
+  local strVer
+  if widget.cfg.sim_designator == 1 then
+    strVer = "Simulator. " .. (osname or "EdgeTX") .. " " .. major .. "." .. minor .. "." .. rev
+  else
+    strVer = (osname or "EdgeTX") .. " " .. major .. "." .. minor .. "." .. rev
+  end
 
   lcd.drawText(xLeft, yStart + 2 * lineHeight, strVer, textStyle + SMLSIZE)
 end
@@ -63,7 +81,7 @@ local function drawBattery()
   idTxV = getFieldInfo('tx-voltage').id
   local vBatt = tonumber(getValue(idTxV)) or 0
   lcd.drawText(xLeft, yStart + 8 + 3 * lineHeight, string.format("%.1fV", vBatt), textStyle + MIDSIZE)
-  
+
   -- Determine battery icon based on RXBt vBatt
   local iconPath = "/WIDGETS/SimModel/BMP/battery-%s.png"
   local iconState
@@ -89,31 +107,99 @@ local function drawDateAndTime(widget)
     return
   end
 
-  -- Convert month to 3-letter abbreviation
-  local months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-  local monthStr = months[datetime.mon] or "???"
+  if widget.cfg.iso8601 == 0 then
+    -- default behavior - no ISO 8601 Timestamp
+    -- display day and month with time below
 
-  local timeStr = string.format("%02d:%02d", datetime.hour, datetime.min)
-  local dateStr = string.format("%02d %s", datetime.day, monthStr)
+    -- Convert month to 3-letter abbreviation
+    local months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+    local monthStr = months[datetime.mon] or "???"
+
+    local timeStr = string.format("%02d:%02d", datetime.hour, datetime.min)
+    local dateStr = string.format("%02d %s", datetime.day, monthStr)
+
+    -- Define positions
+    local xRight = widget.zone.x + widget.zone.w - 10
+    local yStart = widget.zone.y + 5
+
+    -- Draw Date and Time Block
+    lcd.drawText(xRight, yStart, timeStr, textStyleRight)
+    lcd.drawText(xRight, yStart + lineHeight, dateStr, textStyleRight)
+  else
+    -- show date and time as ISO 8601 Timestamp in a single line
+    local tsStr = string.format("%04d-%02d-%02d %02d:%02d", datetime.year, datetime.mon, datetime.day, datetime.hour, datetime.min)
+
+    -- Define positions
+    local xRight = widget.zone.x + widget.zone.w - 10
+    local yStart = widget.zone.y + 5
+
+    -- Draw Date and Time Block
+    lcd.drawText(xRight, yStart, tsStr, textStyleRight)
+  end
+end
+
+local function drawTimers(widget)
+  local t0 = model.getTimer(0)
+  local t1 = model.getTimer(1)
+  local t2 = model.getTimer(2)
 
   -- Define positions
   local xRight = widget.zone.x + widget.zone.w - 10
-  local yStart = widget.zone.y + 5
+  local y = widget.zone.y + 5 + lineHeight
 
-  -- Draw Date and Time Block
-  lcd.drawText(xRight, yStart, timeStr, textStyleRight)
-  lcd.drawText(xRight, yStart + lineHeight, dateStr, textStyleRight)
+  -- shift down one unless ISO8601 (two lines vs one)
+  if widget.cfg.iso8601 == 0 then y = y + lineHeight end
+
+  -- mode == 0 means 'off'
+  if t0 ~= nil and t0.mode > 0 then
+    local t0H = math.floor(t0.value/3600)
+    local t0M = math.floor(t0.value/60) - t0H*60
+    local t0S = t0.value - t0H*3600 - t0M*60
+    local t0Str = string.format("%s %02d:%02d", t0.name, t0M, t0S)
+    if t0H > 0 then local t0Str = string.format("%s %02d:%02d:%02d", t0.name, t0H, t0M, t0S) end
+    lcd.drawText(xRight, y, t0Str, textStyleRight)
+
+    -- shift down y by one line
+    y = y + lineHeight
+  end
+
+  if t1 ~= nil and t1.mode > 0 then
+    local t1H = math.floor(t1.value/3600)
+    local t1M = math.floor(t1.value/60) - t1H*60
+    local t1S = t1.value - t1H*3600 - t1M*60
+    local t1Str = string.format("%s %02d:%02d", t1.name, t1M, t1S)
+    if t1H > 0 then local t1Str = string.format("%s %02d:%02d:%02d", t1.name, t1H, t1M, t1S) end
+    lcd.drawText(xRight, y, t1Str, textStyleRight)
+
+    -- shift down y by one line
+    y = y + lineHeight
+  end
+
+  if t2 ~= nil and t2.mode > 0 then
+    local t2H = math.floor(t2.value/3600)
+    local t2M = math.floor(t2.value/60) - t2H*60
+    local t2S = t2.value - t2H*3600 - t2M*60
+    local t2Str = string.format("%s %02d:%02d", t2.name, t2M, t2S)
+    if t2H > 0 then local t2Str = string.format("%s %02d:%02d:%02d", t2.name, t2H, t2M, t2S) end
+    lcd.drawText(xRight, y, t2Str, textStyleRight)
+
+    -- shift down y by one line
+    y = y + lineHeight
+  end
 end
 
 local function refresh(widget, event, touchState)
   drawModelInfo(widget)
   drawBattery()
   drawDateAndTime(widget)
+  if widget.cfg.timers == 1 then
+    drawTimers(widget)
+  end
 end
 
 return {
   name = "SimModel",
-  options = {},
+  options = options,
   create = create,
   update = update,
   refresh = refresh
