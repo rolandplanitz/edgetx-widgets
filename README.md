@@ -118,5 +118,5 @@ Place the widgets in the order specified on the next image. Location details:
 2. Delete the folders corresponding to the widget you wish to remove.
 
 ## Additional Resources
-- [EdgeTX Documentation](https://www.edgetx.org/documentation)
+- [EdgeTX Documentation](https://manual.edgetx.org)
 - [EdgeTX GitHub](https://github.com/EdgeTX)
