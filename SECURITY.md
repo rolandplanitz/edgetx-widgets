@@ -1,13 +1,13 @@
 # Security Policy
 
 ## Supported Versions
-The widges in here were tested on the following EdgeTX versions:
+The widges were tested on the following EdgeTX versions:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 2.11.1  | ✅                 |
-| 2.10.5  | :white_check_mark: |
-| unsupported version placeholder  | :x: |
+| Version     | Supported          |
+| ----------- | ------------------ |
+| 2.11.1      | :white_check_mark: |
+| 2.10.5      | :white_check_mark: |
+| placeholder | :x:                |
 
 ## Reporting a Vulnerability
 
