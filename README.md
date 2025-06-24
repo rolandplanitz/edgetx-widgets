@@ -80,13 +80,13 @@ Currently there are two different Layouts.
 
 ### ELRS Model
 
-For Drones using ELRS, pace the Widgets like this:
+For Drones using ELRS, pace the Widgets like this:  
 ![Widget Locations](/widgets/img/widget_layout.jpg)
 
 
 ### Simulator Model
 
-For the Simulator model, place the Widgets like this:
+For the Simulator model, place the Widgets like this:  
 ![Widget Locations](/widgets/img/widget_layout_sim.jpg)
 
 
