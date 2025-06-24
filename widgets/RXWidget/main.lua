@@ -29,16 +29,17 @@ local function formatTime(seconds)
   return string.format("%02d:%02d", minutes, remainingSeconds)
 end
 
--- Function to format RSSI values
-local function formatRSSI(rssi1, rssi2)
-  if rssi1 == 0 and rssi2 == 0 then
-      return "RSSI: 0dBm"
-  elseif rssi1 ~= 0 and rssi2 == 0 then
-      return "RSSI1: " .. rssi1 .. "dBm"
-  elseif rssi2 ~= 0 and rssi1 == 0 then
-      return "RSSI2: " .. rssi2 .. "dBm"
+-- Helper for RSSI display
+local function drawRSSI(r1, r2)
+  if r1 == 0 and r2 == 0 then
+    lcd.drawText(xLeft, yStart + 5 * lineHeight, "RSSI: 0dBm", textStyle)
+  elseif r1 ~= 0 and r2 == 0 then
+    lcd.drawText(xLeft, yStart + 5 * lineHeight, "RSSI1: " .. r1 .. "dBm", textStyle)
+  elseif r2 ~= 0 and r1 == 0 then
+    lcd.drawText(xLeft, yStart + 5 * lineHeight, "RSSI2: " .. r2 .. "dBm", textStyle)
   else
-      return "RSSI1: " .. rssi1 .. "dBm; RSSI2: " .. rssi2 .. "dBm"
+    lcd.drawText(xLeft, yStart + 5 * lineHeight, "RSSI1: " .. r1 .. "dBm", textStyle)
+    lcd.drawText(xLeft, yStart + 6 * lineHeight, "RSSI2: " .. r2 .. "dBm", textStyle)
   end
 end
 
@@ -58,22 +59,18 @@ local function drawRfTelemetryText(widget, tlm)
     tlm.ant = getValue("ANT")
 
     local modestr = (mod.RFMOD and mod.RFMOD[tlm.rfmd+1]) or ("RFMD" .. tostring(tlm.rfmd)) 
-    local rssi = formatRSSI(tlm.rssi1, tlm.rssi2)
 
     tlm.fmode = getValue("FM") or 0
 
     local rfmd = getValue ("RFMD") 
-    idTmr1 = getFieldInfo('timer1').id
-    local timer1 = getValue(idTmr1)
-    local timer1Formatted = formatTime(timer1)
 
     --lcd.drawText(xLeft, yStart + lineHeight, "RX Connected", textStyle)
     lcd.drawText(xLeft, yStart + lineHeight, "Power: " .. tostring(tlm.tpwr) .. "mW", textStyle)
     lcd.drawText(xLeft, yStart + 2 * lineHeight, "RFMD: " .. tostring(modestr), textStyle)
-    lcd.drawText(xLeft, yStart + 3 * lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
-    lcd.drawText(xLeft, yStart + 4 * lineHeight, rssi, textStyle)
-    lcd.drawText(xLeft, yStart + 5 * lineHeight, "FMODE: " .. tostring(tlm.fmode), textStyle)
-    lcd.drawText(xLeft, yStart + 6 * lineHeight, "Time: " .. tostring(timer1Formatted), textStyle)
+    lcd.drawText(xLeft, yStart + 3 * lineHeight, "FMODE: " .. tostring(tlm.fmode), textStyle)
+    lcd.drawText(xLeft, yStart + 4 * lineHeight, "LQ: " .. tostring(tlm.rqly) .. "%", textStyle)
+
+    drawRSSI(tlm.rssi1, tlm.rssi2)
 
   end
 
