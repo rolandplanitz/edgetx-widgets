@@ -88,7 +88,7 @@ local function refresh(widget, event, touchState)
   else
     local xRight = widget.zone.x + widget.zone.w - 10
     local yStart = widget.zone.y + 15 + midLineHeight
-    lcd.drawText(xRight, yStart, string.format("no battery telemetry"), textStyle)
+    lcd.drawText(xRight, yStart, string.format("No battery telemetry"), textStyle)
   end
 end
 
