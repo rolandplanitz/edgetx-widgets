@@ -1,21 +1,14 @@
 # Security Policy
 
 ## Supported Versions
-
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+The widges in here were tested on the following EdgeTX versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 2.11.1  | ✅                 |
+| 2.10.5  | :white_check_mark: |
+| unsupported version placeholder  | :x: |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+please create issues here if it regards widgets or directly at EdgeTX if applicable.
