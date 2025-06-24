@@ -9,7 +9,7 @@ EdgeTX widgets enhance the functionality of your transmitter, allowing you to cu
 
 1. **EdgeTX Firmware**: Ensure your transmitter is running EdgeTX firmware.
    - [Download EdgeTX](https://www.edgetx.org/)
-   - **Compatibility**: These widgets have only been tested with EdgeTX 2.10.5.
+   - **Compatibility**: These widgets have only been tested with EdgeTX 2.10.5 (and 2.11.1).
 2. **SD Card Setup**:
    - Verify that your SD card has the correct file structure for EdgeTX.
    - Use the [EdgeTX Companion](https://www.edgetx.org/tools) to update your SD card contents, if necessary.
@@ -118,5 +118,5 @@ Place the widgets in the order specified on the next image. Location details:
 2. Delete the folders corresponding to the widget you wish to remove.
 
 ## Additional Resources
-- [EdgeTX Documentation](https://www.edgetx.org/documentation)
+- [EdgeTX Documentation](https://manual.edgetx.org)
 - [EdgeTX GitHub](https://github.com/EdgeTX)
