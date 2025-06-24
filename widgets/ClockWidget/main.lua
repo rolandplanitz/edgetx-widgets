@@ -6,7 +6,6 @@ local months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 local iconPathFmt = "/WIDGETS/ClockWidget/BMP/connection-%s.png"
 
-
 -- Function to format time string
 local function getFormattedTime(datetime, is24Hour)
   local hour = datetime.hour
@@ -27,6 +26,21 @@ local function getFormattedTime(datetime, is24Hour)
   end
 
   return string.format("%02d:%02d%s", hour, datetime.min, is24Hour and "" or amPm)
+end
+
+-- get timers and draw them unless mode == 'off'
+local function drawTimer(i, x, y, style)
+  local t = model.getTimer(i)
+  if t ~= nil and t.mode > 0 then
+    local h = math.floor(t.value/3600)
+    local m = math.floor(t.value/60) - h*60
+    local s = t.value - h*3600 - m*60
+    local str = string.format("%s %02d:%02d", t.name, m, s)
+    if h > 0 then str = string.format("%s %02d:%02d:%02d", t.name, h, m, s) end
+    lcd.drawText(x, y, str, style)
+    return true
+  end
+  return false
 end
 
 -- Widget creation: preload bitmaps
@@ -101,46 +115,11 @@ local function refresh(widget, event, touchState)
     local timerY = yStart + lineHeight
     if widget.cfg.iso8601 == 0 then timerY = timerY + lineHeight end
 
-    -- get timers
-    local t0 = model.getTimer(0)
-    local t1 = model.getTimer(1)
-    local t2 = model.getTimer(2)
-
-    -- mode == 0 means 'off'
-    if t0 ~= nil and t0.mode > 0 then
-      local t0H = math.floor(t0.value/3600)
-      local t0M = math.floor(t0.value/60) - t0H*60
-      local t0S = t0.value - t0H*3600 - t0M*60
-      local t0Str = string.format("%s %02d:%02d", t0.name, t0M, t0S)
-      if t0H > 0 then local t0Str = string.format("%s %02d:%02d:%02d", t0.name, t0H, t0M, t0S) end
-      lcd.drawText(xRight, timerY, t0Str, textStyle)
-
-      -- shift down y by one line
-      timerY = timerY + lineHeight
-    end
-
-    if t1 ~= nil and t1.mode > 0 then
-      local t1H = math.floor(t1.value/3600)
-      local t1M = math.floor(t1.value/60) - t1H*60
-      local t1S = t1.value - t1H*3600 - t1M*60
-      local t1Str = string.format("%s %02d:%02d", t1.name, t1M, t1S)
-      if t1H > 0 then local t1Str = string.format("%s %02d:%02d:%02d", t1.name, t1H, t1M, t1S) end
-      lcd.drawText(xRight, timerY, t1Str, textStyle)
-
-      -- shift down y by one line
-      timerY = timerY + lineHeight
-    end
-
-    if t2 ~= nil and t2.mode > 0 then
-      local t2H = math.floor(t2.value/3600)
-      local t2M = math.floor(t2.value/60) - t2H*60
-      local t2S = t2.value - t2H*3600 - t2M*60
-      local t2Str = string.format("%s %02d:%02d", t2.name, t2M, t2S)
-      if t2H > 0 then local t2Str = string.format("%s %02d:%02d:%02d", t2.name, t2H, t2M, t2S) end
-      lcd.drawText(xRight, timerY, t2Str, textStyle)
-
-      -- shift down y by one line
-      timerY = timerY + lineHeight
+    -- draw up to three timers (0,1,2)
+    for i=0,2 do
+      if drawTimer(i,xRight,timerY,textStyle)
+        timerY = timerY + lineHeight
+      end
     end
   end
 end
