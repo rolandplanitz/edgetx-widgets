@@ -134,7 +134,6 @@ local function drawGpsTelemetry(widget)
     widget.gpsSATS = tonumber(getValue("Sats")) or 0
     widget.gpsLatLon = getValue("GPS")
 
-
     if (type(widget.gpsLatLon) == "table") then             
         widget.gpsLAT = widget.gpsLatLon.lat or 0
         widget.gpsLON = widget.gpsLatLon.lon or 0   
@@ -149,17 +148,9 @@ local function drawGpsTelemetry(widget)
     local latStr, lonStr = formatLatLon(widget.gpsLAT, widget.gpsLON)
     latStr = "Lat: " .. latStr
     lonStr = "Lon: " .. lonStr
-    if widget.options.mgrs == 1 then
+    if widget.options.MGRS == 1 then
         latStr, lonStr = formatMGRS(widget.gpsLAT, widget.gpsLON)
     end
-
-    -- DEBUG
-    --local demoLAT = 
-    --local demoLON = 
-    --local a,b = formatMGRS(demoLAT, demoLON)
-    --lcd.drawText(xRight, yStart + lineHeight + lineHeight, a, textStyle)
-    --lcd.drawText(xRight, yStart + lineHeight + lineHeight + lineHeight, b, textStyle)
-    -- DEBUG
 
     if widget.isGPSValid then
         local iconPath = "/WIDGETS/GPSWidget/BMP/satellite-%s.png"
@@ -168,8 +159,6 @@ local function drawGpsTelemetry(widget)
         lcd.drawText(xRight - 35, yStart + 2, string.format("Sats: %d", widget.gpsSATS), textStyle  + MIDSIZE)
 
         if widget.options.Coordinates == 1 then
-            --lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
-            --lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)    
             lcd.drawText(xRight, yStart + midLineHeight, latStr, textStyle)
             lcd.drawText(xRight, yStart + midLineHeight + lineHeight, lonStr, textStyle)    
         end
@@ -178,8 +167,6 @@ local function drawGpsTelemetry(widget)
             lcd.drawText(xRight - 35, yStart + 2, "No GPS", textStyle + MIDSIZE)
         else
             lcd.drawText(xRight + 10, yStart + 2, "Last location: ", textStyle + MIDSIZE)
-            --lcd.drawText(xRight, yStart + midLineHeight, "Lat: " .. latStr, textStyle)
-            --lcd.drawText(xRight, yStart + midLineHeight + lineHeight, "Lon: " .. lonStr, textStyle)
             lcd.drawText(xRight, yStart + midLineHeight, latStr, textStyle)
             lcd.drawText(xRight, yStart + midLineHeight + lineHeight, lonStr, textStyle)
         end
