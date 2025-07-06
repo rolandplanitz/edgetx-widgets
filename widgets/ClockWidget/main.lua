@@ -117,7 +117,7 @@ local function refresh(widget, event, touchState)
 
     -- draw up to three timers (0,1,2)
     for i=0,2 do
-      if drawTimer(i,xRight,timerY,textStyle)
+      if drawTimer(i,xRight,timerY,textStyle) then
         timerY = timerY + lineHeight
       end
     end

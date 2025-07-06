@@ -163,7 +163,7 @@ local function drawTimers(widget)
 
   -- draw up to three timers (0,1,2)
   for i=0,2 do
-    if drawTimer(i,xRight,y,textStyleRight)
+    if drawTimer(i,xRight,y,textStyleRight) then
       y = y + lineHeight
     end
   end
